@@ -13,6 +13,21 @@ experimental: Try the code inside your browser with -> http://beta.codenvy.com/f
 
 This guide walks you through the process of creating a "hello world" link:/understanding/REST[RESTful web service] with Spring.
 
+
+== How to build and push
+
+gradle build
+----
+# gradlew clean
+# gradlew build
+----
+
+cloudfoundry push
+----
+# cf push
+# cf logs motor-detection
+----
+
 == What you'll build
 
 You'll build a service that will accept HTTP GET requests at:
