@@ -44,9 +44,10 @@ public class GreetingController {
 		//catch input string
 		JSONObject jsonInput = new JSONObject(this.convertRequestBODY2String(requestBodyStream));
 		returnResult = jsonInput.toString();
-
-		String stringFirehose = "firehouseData";
+		System.out.print("Request body:" + returnResult);
+		String stringFirehose = "firehoseData";
 		String stringFeature = "featureData";
+
 /*
 		JSONArray Va = jsonInput.getJSONObject(stringFirehose).getJSONArray("V1");
                 JSONArray Vb = jsonInput.getJSONObject(stringFirehose).getJSONArray("V2");
@@ -57,14 +58,13 @@ public class GreetingController {
                 JSONArray AccX = jsonInput.getJSONObject(stringFirehose).getJSONArray("A1");
                 JSONArray AccY = jsonInput.getJSONObject(stringFirehose).getJSONArray("A2");
                 JSONArray AccZ = jsonInput.getJSONObject(stringFirehose).getJSONArray("A3");
-                JSONArray Va_FFT = jsonInput.getJSONObject(stringFeature).getJSONArray("V1");
-                JSONArray Vb_FFT = jsonInput.getJSONObject(stringFeature).getJSONArray("V2");
-                JSONArray Vc_FFT = jsonInput.getJSONObject(stringFeature).getJSONArray("V3");
-                JSONArray Ia_FFT = jsonInput.getJSONObject(stringFeature).getJSONArray("I1");
-                JSONArray Ib_FFT = jsonInput.getJSONObject(stringFeature).getJSONArray("I2");
-                JSONArray Ic_FFT = jsonInput.getJSONObject(stringFeature).getJSONArray("I3");
-		//returnResult = jsonInput.getJSONObject("firehose").getJSONArray("V1").toString();
-		//returnResult = Va.get(0).toString();
+*/ 
+               JSONArray Va_FFT = jsonInput.getJSONObject(stringFeature).getJSONArray("list_V1");
+                JSONArray Vb_FFT = jsonInput.getJSONObject(stringFeature).getJSONArray("list_V2");
+                JSONArray Vc_FFT = jsonInput.getJSONObject(stringFeature).getJSONArray("list_V3");
+                JSONArray Ia_FFT = jsonInput.getJSONObject(stringFeature).getJSONArray("list_I1");
+                JSONArray Ib_FFT = jsonInput.getJSONObject(stringFeature).getJSONArray("list_I2");
+                JSONArray Ic_FFT = jsonInput.getJSONObject(stringFeature).getJSONArray("list_I3");
 
 		//prepare classifier input
 		List<Double> V1 = new ArrayList<Double>();
@@ -76,6 +76,7 @@ public class GreetingController {
                 List<Double> A1 = new ArrayList<Double>();
                 List<Double> A2 = new ArrayList<Double>();
                 List<Double> A3 = new ArrayList<Double>();
+/*
 		for (int i=0; i<Va.length(); i++) {
 			V1.add( Double.parseDouble(Va.get(i).toString()) );
 			V2.add( Double.parseDouble(Vb.get(i).toString()) );
@@ -87,9 +88,9 @@ public class GreetingController {
                     	A2.add( Double.parseDouble(AccY.get(i).toString()) );
                     	A3.add( Double.parseDouble(AccZ.get(i).toString()) );
 		}
-
-
 */
+
+
 
 
 		List<Integer> cmsList = new ArrayList<Integer>();
@@ -139,6 +140,7 @@ public class GreetingController {
                 StringEntity entity = new StringEntity(json.toString(), ContentType.APPLICATION_JSON);
 
 		//post to elasticSearch
+		System.out.print("post to elasticSearch");
 		HttpClient httpClient = HttpClientBuilder.create().build();
                 HttpPost request = new HttpPost("http://124.9.14.16:9200/testindex1/mytype");
                 request.setEntity(entity);
@@ -146,12 +148,19 @@ public class GreetingController {
 
 
 	} catch (Exception ex) {
+		System.out.print("JSON Execption");
+
+		//JSONObject jsonInput = new JSONObject(this.convertRequestBODY2String(requestBodyStream));
+                //returnResult = jsonInput.toString();
+
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
 		ex.printStackTrace(pw);
+		//return returnResult;
 		return sw.toString();
         }   
 	return returnResult;
+//	return this.convertRequestBODY2String(requestBodyStream);
     }
 
 	private String convertRequestBODY2String(InputStream requestBodyStream){
@@ -169,6 +178,7 @@ public class GreetingController {
 				e.printStackTrace();
     			 }
     			}while(bufferContent > 0 );
+			System.out.println(buffer.toString());
  		   return buffer.toString();
 		 }
 

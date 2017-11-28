@@ -34,7 +34,7 @@ URI: http://motor-classifier.iii-cflab.com/motorclassifier
 Method: POST
 POST body:
 {
-	"firehouseDlata": {
+	"fireHouse": {
 		"Machine_ID": "001",
 		"V1": [20, 20, 20, 20],
 		"V2": [20, 20, 20, 20],
@@ -49,12 +49,12 @@ POST body:
 	},
 	"featureData": {
 		"Machine_ID": "001",
-		"V1": [20, 20, 20, 20],
-		"V2": [20, 20, 20, 20],
-		"V3": [20, 20, 20, 20],
-		"I1": [20, 20, 20, 20],
-		"I2": [20, 20, 20, 20],
-		"I3": [20, 20, 20, 20],
+		"list_V1": [20, 20, 20, 20],
+		"list_V2": [20, 20, 20, 20],
+		"list_V3": [20, 20, 20, 20],
+		"list_I1": [20, 20, 20, 20],
+		"list_I2": [20, 20, 20, 20],
+		"list_I3": [20, 20, 20, 20],
 		"Time": 1511425672
 	}
 }
