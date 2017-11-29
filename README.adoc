@@ -34,6 +34,7 @@ URI: http://motor-classifier.iii-cflab.com/motorclassifier
 Method: POST
 POST body:
 {
+	"MachineID": "Motor_AIPSR_Lab3",
 	"fireHouse": {
 		"Machine_ID": "001",
 		"V1": [20, 20, 20, 20],
