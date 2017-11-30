@@ -28,9 +28,9 @@ cloudfoundry push
 # cf logs motor-detection
 ----
 
-== RESTful interface
+== REST interface for post message
 ----
-URI: http://motor-classifier.iii-cflab.com/motorclassifier
+URI: http://motor-classifier.iii-cflab.com/motorclassifier-c
 Method: POST
 POST body:
 {
@@ -58,5 +58,16 @@ POST body:
 		"list_I3": [20, 20, 20, 20],
 		"Time": 1511425672
 	}
+}
+----
+
+
+== REST interface for config next step
+----
+URI: http://motor-classifier.iii-cflab.com/config
+Method: POST
+POST body:
+{
+	"Next_Interface":"visualization"
 }
 ----
