@@ -32,8 +32,9 @@ public class GreetingController {
 
     //private static final String template = "Hello, %s!";
     //private final AtomicLong counter = new AtomicLong();
+    private String nextInterface = null;
 
-    @RequestMapping(value="/motorclassifier", method = RequestMethod.POST)
+    @RequestMapping(value="/motorclassifier-c", method = RequestMethod.POST)
     //public Greeting greeting(@RequestParam(value="name", defaultValue="World") InputStream requestStream) {
     public String greeting(InputStream requestBodyStream) {
 	String name = null;
@@ -44,11 +45,12 @@ public class GreetingController {
 		//catch input string
 		JSONObject jsonInput = new JSONObject(this.convertRequestBODY2String(requestBodyStream));
 		returnResult = jsonInput.toString();
-		System.out.print("Request body:" + returnResult);
+		//System.out.print("Request body:" + returnResult);
 		String stringFirehose = "firehoseData";
 		String stringFeature = "featureData";
 
-/*
+
+		String machineID = jsonInput.getJSONObject(stringFirehose).get("Machine_ID").toString();;
 		JSONArray Va = jsonInput.getJSONObject(stringFirehose).getJSONArray("V1");
                 JSONArray Vb = jsonInput.getJSONObject(stringFirehose).getJSONArray("V2");
                 JSONArray Vc = jsonInput.getJSONObject(stringFirehose).getJSONArray("V3");
@@ -58,8 +60,8 @@ public class GreetingController {
                 JSONArray AccX = jsonInput.getJSONObject(stringFirehose).getJSONArray("A1");
                 JSONArray AccY = jsonInput.getJSONObject(stringFirehose).getJSONArray("A2");
                 JSONArray AccZ = jsonInput.getJSONObject(stringFirehose).getJSONArray("A3");
-*/ 
-               JSONArray Va_FFT = jsonInput.getJSONObject(stringFeature).getJSONArray("list_V1");
+ 
+                JSONArray Va_FFT = jsonInput.getJSONObject(stringFeature).getJSONArray("list_V1");
                 JSONArray Vb_FFT = jsonInput.getJSONObject(stringFeature).getJSONArray("list_V2");
                 JSONArray Vc_FFT = jsonInput.getJSONObject(stringFeature).getJSONArray("list_V3");
                 JSONArray Ia_FFT = jsonInput.getJSONObject(stringFeature).getJSONArray("list_I1");
@@ -76,7 +78,7 @@ public class GreetingController {
                 List<Double> A1 = new ArrayList<Double>();
                 List<Double> A2 = new ArrayList<Double>();
                 List<Double> A3 = new ArrayList<Double>();
-/*
+
 		for (int i=0; i<Va.length(); i++) {
 			V1.add( Double.parseDouble(Va.get(i).toString()) );
 			V2.add( Double.parseDouble(Vb.get(i).toString()) );
@@ -88,9 +90,23 @@ public class GreetingController {
                     	A2.add( Double.parseDouble(AccY.get(i).toString()) );
                     	A3.add( Double.parseDouble(AccZ.get(i).toString()) );
 		}
-*/
 
+		//FFT
+		List<Double> V1_FFT = new ArrayList<Double>();
+                List<Double> V2_FFT = new ArrayList<Double>();
+                List<Double> V3_FFT = new ArrayList<Double>();
+                List<Double> I1_FFT = new ArrayList<Double>();
+                List<Double> I2_FFT = new ArrayList<Double>();
+                List<Double> I3_FFT = new ArrayList<Double>();
 
+		for (int i=0; i<Va_FFT.length(); i++) {
+                        V1_FFT.add( Double.parseDouble(Va_FFT.get(i).toString()) );
+                        V2_FFT.add( Double.parseDouble(Vb_FFT.get(i).toString()) );
+                        V3_FFT.add( Double.parseDouble(Vc_FFT.get(i).toString()) );
+                        I1_FFT.add( Double.parseDouble(Ia_FFT.get(i).toString()) );
+                        I2_FFT.add( Double.parseDouble(Ib_FFT.get(i).toString()) );
+                        I3_FFT.add( Double.parseDouble(Ic_FFT.get(i).toString()) );
+                }
 
 
 		List<Integer> cmsList = new ArrayList<Integer>();
@@ -110,22 +126,24 @@ public class GreetingController {
                 sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
                 String formattedDate = sdf.format(date);
 
-		json.put("ID", "Motor2");
+		json.put("ID", machineID);
                 json.put("timestamp", formattedDate);
-		json2.put("Va_rms", 221.0);
-		json2.put("Vb_rms", 221.0);
-                json2.put("Vc_rms", 220.0);
-                json2.put("Ia_rms", 5.0);
-                json2.put("Ib_rms", 6.0);
-                json2.put("Ic_rms", 7.0);
-                json2.put("VUR", 5.0);
-                json2.put("IUR", 6.0);
-                json2.put("VTHD", 3.0);
-                json2.put("ITHD", 5.0);
-                json2.put("AccX_max", 5.0);
-                json2.put("AccY_max", 5.0);
-                json2.put("AccZ_max", 54.0);
-                json2.put("VelX_max", 5.0);
+		json2.put("Va_rms", PointerMath.rms(V1));
+		json2.put("Vb_rms", PointerMath.rms(V2));
+                json2.put("Vc_rms", PointerMath.rms(V3));
+                json2.put("Ia_rms", PointerMath.rms(I1));
+                json2.put("Ib_rms", PointerMath.rms(I2));
+                json2.put("Ic_rms", PointerMath.rms(I3));
+                json2.put("VUR", PointerMath.UR(PointerMath.rms(V1), PointerMath.rms(V2), PointerMath.rms(V3)));
+                json2.put("IUR", PointerMath.UR(PointerMath.rms(I1), PointerMath.rms(I2), PointerMath.rms(I3)));
+                //json2.put("VTHD", PointerMath.THD(V1_FFT.stream().mapToDouble(d -> d).toArray()));
+                json2.put("VTHD", 32);
+                //json2.put("ITHD", PointerMath.THD(I1_FFT.stream().mapToDouble(d -> d).toArray()));
+                json2.put("ITHD", 23);
+                json2.put("AccX_max", PointerMath.accvm(A1));
+                json2.put("AccY_max", PointerMath.accvm(A2));
+                json2.put("AccZ_max", PointerMath.accvm(A3));
+                json2.put("VelX_max", 4.0);
                 json2.put("VelY_max", 9.0);
                 json2.put("VelZ_max", 5.0);
                 json2.put("DisX_max", 5.0);
@@ -140,28 +158,45 @@ public class GreetingController {
                 StringEntity entity = new StringEntity(json.toString(), ContentType.APPLICATION_JSON);
 
 		//post to elasticSearch
-		System.out.print("post to elasticSearch");
-		HttpClient httpClient = HttpClientBuilder.create().build();
-                HttpPost request = new HttpPost("http://124.9.14.16:9200/testindex1/mytype");
-                request.setEntity(entity);
-                HttpResponse response = httpClient.execute(request);
-
+		if (nextInterface.equals("visualization")){
+			System.out.print("post to elasticSearch");
+			HttpClient httpClient = HttpClientBuilder.create().build();
+	                HttpPost request = new HttpPost("http://124.9.14.16:9200/testindex1/mytype");
+	                request.setEntity(entity);
+	                HttpResponse response = httpClient.execute(request);
+			returnResult = json.toString();
+		} else {
+			returnResult = "NextInterface is null";
+		}
 
 	} catch (Exception ex) {
 		System.out.print("JSON Execption");
 
-		//JSONObject jsonInput = new JSONObject(this.convertRequestBODY2String(requestBodyStream));
-                //returnResult = jsonInput.toString();
-
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
 		ex.printStackTrace(pw);
-		//return returnResult;
 		return sw.toString();
         }   
 	return returnResult;
-//	return this.convertRequestBODY2String(requestBodyStream);
     }
+
+
+
+	@RequestMapping(value="/config", method = RequestMethod.POST)
+	public String getConfig(InputStream requestBodyStream) {
+		try{
+			JSONObject jsonInput = new JSONObject(this.convertRequestBODY2String(requestBodyStream));
+			nextInterface = jsonInput.get("Next_Interface").toString();
+		} catch (Exception ex) {
+			StringWriter sw = new StringWriter();
+	                PrintWriter pw = new PrintWriter(sw);
+	                ex.printStackTrace(pw);
+	                return sw.toString();
+		}
+		return nextInterface;
+	}
+
+
 
 	private String convertRequestBODY2String(InputStream requestBodyStream){
     		StringBuffer buffer = new StringBuffer();
@@ -178,7 +213,7 @@ public class GreetingController {
 				e.printStackTrace();
     			 }
     			}while(bufferContent > 0 );
-			System.out.println(buffer.toString());
+			//System.out.println(buffer.toString());
  		   return buffer.toString();
 		 }
 

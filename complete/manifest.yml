@@ -1,8 +1,8 @@
 ---
 applications:
-- name: motor-detection
+- name: motor-detection-c
   memory: 1024M
   instances: 1
-  host: motor-classifier
+  host: motor-classifier-c
   #domain: guides.spring.io
   path: build/libs/gs-rest-service-0.1.0.jar
