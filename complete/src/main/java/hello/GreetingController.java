@@ -136,10 +136,10 @@ public class GreetingController {
                 json2.put("Ic_rms", PointerMath.rms(I3));
                 json2.put("VUR", PointerMath.UR(PointerMath.rms(V1), PointerMath.rms(V2), PointerMath.rms(V3)));
                 json2.put("IUR", PointerMath.UR(PointerMath.rms(I1), PointerMath.rms(I2), PointerMath.rms(I3)));
-                //json2.put("VTHD", PointerMath.THD(V1_FFT.stream().mapToDouble(d -> d).toArray()));
-                json2.put("VTHD", 32);
-                //json2.put("ITHD", PointerMath.THD(I1_FFT.stream().mapToDouble(d -> d).toArray()));
-                json2.put("ITHD", 23);
+                json2.put("VTHD", PointerMath.THD(V1_FFT.stream().mapToDouble(d -> d).toArray()));
+                //json2.put("VTHD", 32);
+                json2.put("ITHD", PointerMath.THD(I1_FFT.stream().mapToDouble(d -> d).toArray()));
+                //json2.put("ITHD", 23);
                 json2.put("AccX_max", PointerMath.accvm(A1));
                 json2.put("AccY_max", PointerMath.accvm(A2));
                 json2.put("AccZ_max", PointerMath.accvm(A3));
