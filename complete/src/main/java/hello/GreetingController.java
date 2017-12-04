@@ -21,6 +21,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -34,6 +36,14 @@ public class GreetingController {
     //private final AtomicLong counter = new AtomicLong();
     private String nextInterface = null;
 
+    /*
+    private static Logger logger = Logger.getLogger(GreetingController.class);
+    private static void log4jProperties() {
+	PropertyConfigurator.configure("log4j.properties");
+    }
+    */
+
+
     @RequestMapping(value="/motorclassifier-c", method = RequestMethod.POST)
     //public Greeting greeting(@RequestParam(value="name", defaultValue="World") InputStream requestStream) {
     public String greeting(InputStream requestBodyStream) {
@@ -46,7 +56,7 @@ public class GreetingController {
 		JSONObject jsonInput = new JSONObject(this.convertRequestBODY2String(requestBodyStream));
 		returnResult = jsonInput.toString();
 		double[] DiagnosisPointer = new double[5];
-		//System.out.print("Request body:" + returnResult);
+		System.out.print("Request body:" + returnResult);
 		String stringFirehose = "firehoseData";
 		String stringFeature = "featureData";
 
@@ -129,30 +139,53 @@ public class GreetingController {
 
 		json.put("ID", machineID);
                 json.put("timestamp", formattedDate);
-		json2.put("Va_rms", PointerMath.rms(V1));
-		json2.put("Vb_rms", PointerMath.rms(V2));
-                json2.put("Vc_rms", PointerMath.rms(V3));
-                json2.put("Ia_rms", PointerMath.rms(I1));
-                json2.put("Ib_rms", PointerMath.rms(I2));
-                json2.put("Ic_rms", PointerMath.rms(I3));
-                json2.put("VUR", PointerMath.UR(PointerMath.rms(V1), PointerMath.rms(V2), PointerMath.rms(V3)));
-                json2.put("IUR", PointerMath.UR(PointerMath.rms(I1), PointerMath.rms(I2), PointerMath.rms(I3)));
-                json2.put("VTHD", PointerMath.max(PointerMath.THD(V1_FFT.stream().mapToDouble(d -> d).toArray()), PointerMath.THD(V2_FFT.stream().mapToDouble(d -> d).toArray()), PointerMath.THD(V2_FFT.stream().mapToDouble(d -> d).toArray())));
+		json2.put("Va_rms", PointerMath.rms(V1).intValue());
+		json2.put("Vb_rms", PointerMath.rms(V2).intValue());
+                json2.put("Vc_rms", PointerMath.rms(V3).intValue());
+                json2.put("Ia_rms", PointerMath.rms(I1).intValue());
+                json2.put("Ib_rms", PointerMath.rms(I2).intValue());
+                json2.put("Ic_rms", PointerMath.rms(I3).intValue());
+                json2.put("VUR", PointerMath.UR(PointerMath.rms(V1), PointerMath.rms(V2), PointerMath.rms(V3).intValue()));
+                json2.put("IUR", PointerMath.UR(PointerMath.rms(I1), PointerMath.rms(I2), PointerMath.rms(I3).intValue()));
+
+                json2.put("VTHD", PointerMath.max(PointerMath.THD(V1_FFT.stream().mapToDouble(d -> d).toArray()), 
+						PointerMath.THD(V2_FFT.stream().mapToDouble(d -> d).toArray()), 
+						PointerMath.THD(V2_FFT.stream().mapToDouble(d -> d).toArray())));
+
                 //json2.put("VTHD", 32);
-                json2.put("ITHD", PointerMath.max(PointerMath.THD(I1_FFT.stream().mapToDouble(d -> d).toArray()), PointerMath.THD(I2_FFT.stream().mapToDouble(d -> d).toArray()), PointerMath.THD(I2_FFT.stream().mapToDouble(d -> d).toArray())));
+                json2.put("ITHD", PointerMath.max(PointerMath.THD(I1_FFT.stream().mapToDouble(d -> d).toArray()), 
+					PointerMath.THD(I2_FFT.stream().mapToDouble(d -> d).toArray()), 
+					PointerMath.THD(I2_FFT.stream().mapToDouble(d -> d).toArray())));
                 //json2.put("ITHD", 23);
-                json2.put("AccX_max", PointerMath.accvm(A1));
-                json2.put("AccY_max", PointerMath.accvm(A2));
-                json2.put("AccZ_max", PointerMath.accvm(A3));
+                json2.put("AccX_max", PointerMath.accvm(A1).intValue());
+                json2.put("AccY_max", PointerMath.accvm(A2).intValue());
+                json2.put("AccZ_max", PointerMath.accvm(A3).intValue());
                 json2.put("VelX_max", PointerMath.rms(PointerMath.integral(A1, A1.size())));
                 json2.put("VelY_max", PointerMath.rms(PointerMath.integral(A2, A2.size())));
                 json2.put("VelZ_max", PointerMath.rms(PointerMath.integral(A3, A3.size())));
-                json2.put("DisX_max", PointerMath.vpp(PointerMath.integral(PointerMath.integral(A1, A1.size()), A1.size())));
-                json2.put("DisY_max", PointerMath.vpp(PointerMath.integral(PointerMath.integral(A2, A2.size()), A2.size())));
-                json2.put("DisZ_max", PointerMath.vpp(PointerMath.integral(PointerMath.integral(A3, A3.size()), A3.size())));
-                json2.put("CMS", cmsList.get(r.nextInt(cmsList.size())));
-	//	json2.put("CMS", MotorCMS.MotorHealth(PointerMath.max(PointerMath.rms(PointerMath.integral(A1, A1.size())), PointerMath.rms(PointerMath.integral(A2, A2.size())), PointerMath.rms(PointerMath.integral(A3, A3.size()))), PointerMath.UR(PointerMath.rms(I1), PointerMath.rms(I2), PointerMath.rms(I3)), PointerMath.max(PointerMath.THD(I1_FFT.stream().mapToDouble(d -> d).toArray()), PointerMath.THD(I2_FFT.stream().mapToDouble(d -> d).toArray()), PointerMath.THD(I2_FFT.stream().mapToDouble(d -> d).toArray()))));
-		DiagnosisPointer = MotorCMS.FaultDiagnosis(PointerMath.UR(PointerMath.rms(I1), PointerMath.rms(I2), PointerMath.rms(I3)), PointerMath.max(PointerMath.rms(PointerMath.integral(A1, A1.size())), PointerMath.rms(PointerMath.integral(A2, A2.size())), PointerMath.rms(PointerMath.integral(A3, A3.size()))), PointerMath.max(PointerMath.accvm(A1), PointerMath.accvm(A2), PointerMath.accvm(A3)));
+                json2.put("DisX_max", PointerMath.vpp(PointerMath.integral(PointerMath.integral(A1, A1.size()), A1.size())).intValue());
+                json2.put("DisY_max", PointerMath.vpp(PointerMath.integral(PointerMath.integral(A2, A2.size()), A2.size())).intValue());
+                json2.put("DisZ_max", PointerMath.vpp(PointerMath.integral(PointerMath.integral(A3, A3.size()), A3.size())).intValue());
+                //json2.put("CMS", cmsList.get(r.nextInt(cmsList.size())));
+                //
+		json2.put("CMS", MotorCMS.MotorHealth(PointerMath.max(PointerMath.rms(PointerMath.integral(A1, A1.size())), 
+							PointerMath.rms(PointerMath.integral(A2, A2.size())), 
+							PointerMath.rms(PointerMath.integral(A3, A3.size()))), 
+							PointerMath.UR(PointerMath.rms(I1), PointerMath.rms(I2), PointerMath.rms(I3)), 
+							PointerMath.max(PointerMath.THD(I1_FFT.stream().mapToDouble(d -> d).toArray()), 
+							PointerMath.THD(I2_FFT.stream().mapToDouble(d -> d).toArray()), 
+							PointerMath.THD(I2_FFT.stream().mapToDouble(d -> d).toArray()))));
+
+		DiagnosisPointer = MotorCMS.FaultDiagnosis(PointerMath.UR(PointerMath.rms(I1), 
+									PointerMath.rms(I2), 
+									PointerMath.rms(I3)), 
+									PointerMath.max(PointerMath.rms(PointerMath.integral(A1, A1.size())), 
+													PointerMath.rms(PointerMath.integral(A2, A2.size())), 
+													PointerMath.rms(PointerMath.integral(A3, A3.size()))), 
+													PointerMath.max(PointerMath.accvm(A1), 
+													PointerMath.accvm(A2), 
+													PointerMath.accvm(A3)));
+
                 json2.put("Rotor", DiagnosisPointer[1]);
                 json2.put("Stator", DiagnosisPointer[2]);
                 json2.put("Bearing", DiagnosisPointer[3]);
@@ -165,6 +198,7 @@ public class GreetingController {
 			System.out.print("post to elasticSearch");
 			HttpClient httpClient = HttpClientBuilder.create().build();
 	                HttpPost request = new HttpPost("http://124.9.14.16:9200/testindex1/mytype");
+	                //HttpPost request = new HttpPost("http://192.168.0.23:9200/testindex1/mytype");
 	                request.setEntity(entity);
 	                HttpResponse response = httpClient.execute(request);
 			returnResult = json.toString();
@@ -187,6 +221,8 @@ public class GreetingController {
 
 	@RequestMapping(value="/config", method = RequestMethod.POST)
 	public String getConfig(InputStream requestBodyStream) {
+		//log4jProperties();
+
 		try{
 			JSONObject jsonInput = new JSONObject(this.convertRequestBODY2String(requestBodyStream));
 			nextInterface = jsonInput.get("Next_Interface").toString();
@@ -196,6 +232,7 @@ public class GreetingController {
 	                ex.printStackTrace(pw);
 	                return sw.toString();
 		}
+		//logger.info(nextInterface);
 		return nextInterface;
 	}
 
@@ -216,7 +253,7 @@ public class GreetingController {
 				e.printStackTrace();
     			 }
     			}while(bufferContent > 0 );
-			//System.out.println(buffer.toString());
+			System.out.println(buffer.toString());
  		   return buffer.toString();
 		 }
 
