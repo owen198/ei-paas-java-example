@@ -45,6 +45,7 @@ public class GreetingController {
 		//catch input string
 		JSONObject jsonInput = new JSONObject(this.convertRequestBODY2String(requestBodyStream));
 		returnResult = jsonInput.toString();
+		double[] DiagnosisPointer = new double[5];
 		//System.out.print("Request body:" + returnResult);
 		String stringFirehose = "firehoseData";
 		String stringFeature = "featureData";
@@ -136,24 +137,26 @@ public class GreetingController {
                 json2.put("Ic_rms", PointerMath.rms(I3));
                 json2.put("VUR", PointerMath.UR(PointerMath.rms(V1), PointerMath.rms(V2), PointerMath.rms(V3)));
                 json2.put("IUR", PointerMath.UR(PointerMath.rms(I1), PointerMath.rms(I2), PointerMath.rms(I3)));
-                json2.put("VTHD", PointerMath.THD(V1_FFT.stream().mapToDouble(d -> d).toArray()));
+                json2.put("VTHD", PointerMath.max(PointerMath.THD(V1_FFT.stream().mapToDouble(d -> d).toArray()), PointerMath.THD(V2_FFT.stream().mapToDouble(d -> d).toArray()), PointerMath.THD(V2_FFT.stream().mapToDouble(d -> d).toArray())));
                 //json2.put("VTHD", 32);
-                json2.put("ITHD", PointerMath.THD(I1_FFT.stream().mapToDouble(d -> d).toArray()));
+                json2.put("ITHD", PointerMath.max(PointerMath.THD(I1_FFT.stream().mapToDouble(d -> d).toArray()), PointerMath.THD(I2_FFT.stream().mapToDouble(d -> d).toArray()), PointerMath.THD(I2_FFT.stream().mapToDouble(d -> d).toArray())));
                 //json2.put("ITHD", 23);
                 json2.put("AccX_max", PointerMath.accvm(A1));
                 json2.put("AccY_max", PointerMath.accvm(A2));
                 json2.put("AccZ_max", PointerMath.accvm(A3));
-                json2.put("VelX_max", 4.0);
-                json2.put("VelY_max", 9.0);
-                json2.put("VelZ_max", 5.0);
-                json2.put("DisX_max", 5.0);
-                json2.put("DisY_max", 2.0);
-                json2.put("DisZ_max", 50.0);
+                json2.put("VelX_max", PointerMath.rms(PointerMath.integral(A1, A1.size())));
+                json2.put("VelY_max", PointerMath.rms(PointerMath.integral(A2, A2.size())));
+                json2.put("VelZ_max", PointerMath.rms(PointerMath.integral(A3, A3.size())));
+                json2.put("DisX_max", PointerMath.vpp(PointerMath.integral(PointerMath.integral(A1, A1.size()), A1.size())));
+                json2.put("DisY_max", PointerMath.vpp(PointerMath.integral(PointerMath.integral(A2, A2.size()), A2.size())));
+                json2.put("DisZ_max", PointerMath.vpp(PointerMath.integral(PointerMath.integral(A3, A3.size()), A3.size())));
                 json2.put("CMS", cmsList.get(r.nextInt(cmsList.size())));
-                json2.put("Rotor", 5.0);
-                json2.put("Stator", 5.0);
-                json2.put("Bearing", 5.0);
-                json2.put("Eccentric", 5.0);
+	//	json2.put("CMS", MotorCMS.MotorHealth(PointerMath.max(PointerMath.rms(PointerMath.integral(A1, A1.size())), PointerMath.rms(PointerMath.integral(A2, A2.size())), PointerMath.rms(PointerMath.integral(A3, A3.size()))), PointerMath.UR(PointerMath.rms(I1), PointerMath.rms(I2), PointerMath.rms(I3)), PointerMath.max(PointerMath.THD(I1_FFT.stream().mapToDouble(d -> d).toArray()), PointerMath.THD(I2_FFT.stream().mapToDouble(d -> d).toArray()), PointerMath.THD(I2_FFT.stream().mapToDouble(d -> d).toArray()))));
+		DiagnosisPointer = MotorCMS.FaultDiagnosis(PointerMath.UR(PointerMath.rms(I1), PointerMath.rms(I2), PointerMath.rms(I3)), PointerMath.max(PointerMath.rms(PointerMath.integral(A1, A1.size())), PointerMath.rms(PointerMath.integral(A2, A2.size())), PointerMath.rms(PointerMath.integral(A3, A3.size()))), PointerMath.max(PointerMath.accvm(A1), PointerMath.accvm(A2), PointerMath.accvm(A3)));
+                json2.put("Rotor", DiagnosisPointer[1]);
+                json2.put("Stator", DiagnosisPointer[2]);
+                json2.put("Bearing", DiagnosisPointer[3]);
+                json2.put("Eccentric", DiagnosisPointer[4]);
                 json.put("detail", json2);
                 StringEntity entity = new StringEntity(json.toString(), ContentType.APPLICATION_JSON);
 
