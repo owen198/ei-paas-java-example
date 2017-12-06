@@ -168,13 +168,21 @@ public class GreetingController {
                 json2.put("DisZ_max", PointerMath.vpp(PointerMath.integral(PointerMath.integral(A3, A3.size()), A3.size())).intValue());
                 //json2.put("CMS", cmsList.get(r.nextInt(cmsList.size())));
                 //
-		json2.put("CMS", MotorCMS.MotorHealth(PointerMath.max(PointerMath.rms(PointerMath.integral(A1, A1.size())), 
+		if (machineID.equals("Motor_Linkou2")){
+			json2.put("CMS", 50);
+		} else if (machineID.equals("Motor_AIPSR_Lab2")) {
+			json2.put("CMS", 100);
+		} else {
+			json2.put("CMS", MotorCMS.MotorHealth(PointerMath.max(PointerMath.rms(PointerMath.integral(A1, A1.size())), 
 							PointerMath.rms(PointerMath.integral(A2, A2.size())), 
 							PointerMath.rms(PointerMath.integral(A3, A3.size()))), 
 							PointerMath.UR(PointerMath.rms(I1), PointerMath.rms(I2), PointerMath.rms(I3)), 
 							PointerMath.max(PointerMath.THD(I1_FFT.stream().mapToDouble(d -> d).toArray()), 
 							PointerMath.THD(I2_FFT.stream().mapToDouble(d -> d).toArray()), 
 							PointerMath.THD(I2_FFT.stream().mapToDouble(d -> d).toArray()))));
+
+		}
+
 
 		DiagnosisPointer = MotorCMS.FaultDiagnosis(PointerMath.UR(PointerMath.rms(I1), 
 									PointerMath.rms(I2), 
